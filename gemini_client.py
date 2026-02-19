@@ -12,6 +12,11 @@ import os
 from typing import Generator, Optional
 import requests
 
+
+class QuotaExceededError(Exception):
+    """Raised when a provider reports quota/rate-limit (HTTP 429)."""
+    pass
+
 # Read config from environment
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Optional: provider-specific HTTP endpoint (leave empty to use local stub)
@@ -292,7 +297,12 @@ def call_http_endpoint(prompt: str, timeout: float = 15.0) -> Optional[str]:
     payload = {"prompt": prompt_to_send}
     try:
         resp = requests.post(GEMINI_API_ENDPOINT, json=payload, headers=headers, timeout=timeout)
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            if getattr(e, 'response', None) is not None and e.response.status_code == 429:
+                raise QuotaExceededError("Gemini quota exceeded (429)") from e
+            raise
         # Attempt to parse JSON; if it fails we'll log raw text
         try:
             data = resp.json()
@@ -367,7 +377,10 @@ def call_google_generate(prompt: str, timeout: float = 15.0, retry_count: int = 
                 time.sleep(wait_time)
             return None
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
+            status = None
+            if getattr(e, 'response', None) is not None:
+                status = e.response.status_code
+            if status == 429:
                 # Rate limit - retry with backoff
                 print(f"WARNING: API rate limited (429) - (attempt {attempt+1}/{retry_count})")
                 if attempt < retry_count - 1:
@@ -376,8 +389,8 @@ def call_google_generate(prompt: str, timeout: float = 15.0, retry_count: int = 
                     time.sleep(wait_time)
                     continue
                 else:
-                    # Last attempt failed, return None
-                    return None
+                    # Last attempt failed - signal quota exceeded to caller
+                    raise QuotaExceededError("Gemini quota exceeded (429)") from e
             else:
                 print(f"WARNING: API HTTP error {resp.status_code}: {e}")
                 return None
@@ -431,7 +444,16 @@ def generate_response(prompt: str) -> str:
             out = call_google_generate(enhanced_prompt)
             if out is not None:
                 return out
-        except Exception as e:
+        except QuotaExceededError:
+            # Gemini quota exceeded — fall back to Groq
+            try:
+                import groq_client
+                groq_out = groq_client.generate_response(enhanced_prompt)
+                if groq_out:
+                    return groq_out
+            except Exception:
+                pass
+        except Exception:
             # Don't print - let it continue to fallback
             pass
 
@@ -441,11 +463,54 @@ def generate_response(prompt: str) -> str:
             out = call_http_endpoint(enhanced_prompt)
             if out is not None:
                 return out
+        except QuotaExceededError:
+            # Quota exceeded on generic endpoint - try Groq
+            try:
+                import groq_client
+                groq_out = groq_client.generate_response(enhanced_prompt)
+                if groq_out:
+                    return groq_out
+            except Exception:
+                pass
         except Exception as e:
-            # Don't print - let it continue to fallback
-            pass
+            # On any other error from the primary provider, attempt Groq fallback
+            try:
+                # Log the original error to a local debug file (without secrets)
+                import os as _os, datetime as _dt, traceback as _tb, json as _json
+                _logdir = _os.path.join(_os.getcwd(), "logs")
+                _os.makedirs(_logdir, exist_ok=True)
+                _entry = {"ts": _dt.datetime.utcnow().isoformat()+"Z", "stage": "gemini_http", "error": str(e), "trace": _tb.format_exc().splitlines()[-10:]}
+                with open(_os.path.join(_logdir, "gemini_debug.log"), "a", encoding="utf-8") as _f:
+                    _f.write(_json.dumps(_entry, ensure_ascii=False)+"\n")
+            except Exception:
+                pass
+            try:
+                import groq_client
+                groq_out = groq_client.generate_response(enhanced_prompt)
+                if groq_out:
+                    return groq_out
+            except Exception:
+                # final fallback: continue to return generic error below
+                pass
 
     # If both API calls failed/returned None, return error message instead of stub
+    # Try one last fallback to Groq if configured
+    try:
+        import groq_client
+        groq_out = groq_client.generate_response(enhanced_prompt)
+        if groq_out:
+            return groq_out
+    except Exception as e:
+        try:
+            import os as _os, datetime as _dt, traceback as _tb, json as _json
+            _logdir = _os.path.join(_os.getcwd(), "logs")
+            _os.makedirs(_logdir, exist_ok=True)
+            _entry = {"ts": _dt.datetime.utcnow().isoformat()+"Z", "stage": "final_groq_fallback", "error": str(e), "trace": _tb.format_exc().splitlines()[-10:]}
+            with open(_os.path.join(_logdir, "gemini_debug.log"), "a", encoding="utf-8") as _f:
+                _f.write(_json.dumps(_entry, ensure_ascii=False)+"\n")
+        except Exception:
+            pass
+
     return "I'm having trouble connecting to my AI backend right now. Please try again in a moment."
 
 
@@ -556,7 +621,20 @@ def stream_generate(prompt: str):
                 if stream_success:
                     return  # Successfully streamed
         except requests.exceptions.HTTPError as e:
-            print(f"WARNING: Streaming HTTP error {e.response.status_code}: {e}")
+            try:
+                status = e.response.status_code if getattr(e, 'response', None) is not None else None
+            except Exception:
+                status = None
+            if status == 429:
+                # Quota - try streaming from Groq instead
+                try:
+                    import groq_client
+                    for chunk in groq_client.stream_generate(prompt):
+                        yield chunk
+                    return
+                except Exception:
+                    pass
+            print(f"WARNING: Streaming HTTP error {getattr(e, 'response', None) and e.response.status_code}: {e}")
         except Exception as e:
             print(f"WARNING: Streaming failed: {e}")
 
