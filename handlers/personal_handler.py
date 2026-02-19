@@ -7,6 +7,7 @@ from utils.logger import log_interaction
 TECH_STACK = [
     "Python 3.8+",
     "Google Gemini 2.0-Flash API",
+    "Groq Llama 3.1 Model",
     "Google Speech Recognition",
     "pyttsx3 for text-to-speech",
     "Windows Task Scheduling",
