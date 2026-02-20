@@ -33,12 +33,12 @@ def handle_personal_questions(command):
     if re.search(r'\b(who\s+is|do\s+you\s+know)\s+(babin|b a b i n|babin\s+bid)\b', command, re.IGNORECASE):
         if re.search(r'\bwho\s+is\b', command, re.IGNORECASE):
             # "Who is Babin?" or "Who is Babin Bid?"
-            response = (f"Babin Bid is my creator and the developer of EchoMind AI. "
+            response = (f"Babin Bid is my creator and the developer of EchoMind. "
                        f"He built me using {CREATOR_INFO['tech_stack']} and many other technologies "
                        f"to create a voice assistant that can understand and respond to commands.")
         else:
             # "Do you know Babin?" or "Do you know Babin Bid?"
-            response = (f"Yes, I know him! Babin Bid is my creator. He developed me (EchoMind AI) using "
+            response = (f"Yes, I know him! Babin Bid is my creator. He developed me (EchoMind) using "
                        f"{CREATOR_INFO['tech_stack']}, Google Speech Recognition, and other modern technologies. "
                        f"Because of him, I can understand your voice commands and provide intelligent responses.")
         
@@ -58,8 +58,8 @@ def handle_personal_questions(command):
         log_interaction(command, "I'm doing well, thank you! How can I assist you?", source="local")
         return True
     elif re.search(r'\b(your name|who are you|what are you)\b', command, re.IGNORECASE):
-        speak("I am EchoMind AI, your voice assistant.")
-        log_interaction(command, "I am EchoMind AI, your voice assistant.", source="local")
+        speak("I am EchoMind, your voice assistant.")
+        log_interaction(command, "I am EchoMind, your voice assistant.", source="local")
         return True
     
     return False
