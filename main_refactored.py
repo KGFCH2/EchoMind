@@ -1,5 +1,5 @@
 """
-EchoMind AI - Main entry point for the voice assistant
+EchoMind - Main entry point for the voice assistant
 This refactored version uses modular architecture for better maintainability
 """
 import os
