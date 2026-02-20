@@ -22,10 +22,10 @@ def get_greeting():
     now = datetime.datetime.now(ist)
     hour = now.hour
     if 5 <= hour < 12:
-        return "Good morning! I am EchoMind AI, your voice assistant. How can I help you?"
+        return "Good morning! I am EchoMind, your voice assistant. How can I help you?"
     elif 12 <= hour < 17:
-        return "Good afternoon! I am EchoMind AI, your voice assistant. How can I help you?"
+        return "Good afternoon! I am EchoMind, your voice assistant. How can I help you?"
     elif 17 <= hour < 22:
-        return "Good evening! I am EchoMind AI, your voice assistant. How can I help you?"
+        return "Good evening! I am EchoMind, your voice assistant. How can I help you?"
     else:
-        return "Hey there! I am EchoMind AI, your voice assistant. It is time to rest after a hectic day."
+        return "Hey there! I am EchoMind, your voice assistant. It is time to rest after a hectic day."
