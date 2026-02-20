@@ -1,1 +1,1 @@
-"""Command handlers for EchoMind AI"""
+"""Command handlers for EchoMind"""
