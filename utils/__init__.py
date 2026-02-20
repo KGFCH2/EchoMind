@@ -1,1 +1,1 @@
-"""Utility module for EchoMind AI"""
+"""Utility module for EchoMind"""
