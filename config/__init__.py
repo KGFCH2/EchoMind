@@ -1,1 +1,1 @@
-"""Configuration module for EchoMind AI"""
+"""Configuration module for EchoMind"""
