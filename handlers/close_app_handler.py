@@ -127,13 +127,16 @@ def handle_app_closing(command):
                     return _close_tab_or_website(target, None, command)
     
     # PATTERN 4: close [app_name] (without tab keyword - application close)
-    # e.g., "close microsoft edge" → Close entire application
     if has_close_word and not has_tab_keyword:
         app_match = re.search(r'(?:close|shut|kill|terminate|stop)\s+(?:the\s+)?([a-z\s]+?)(?:\s+browser)?$', command_lower)
         if app_match:
             target = app_match.group(1).strip()
+            # If user says "close youtube", try closing a tab first as it's more likely
+            if "youtube" in target:
+                return _close_tab_or_website("youtube", None, command)
+                
             apps = ("chrome", "firefox", "edge", "microsoft edge", "powerpoint", "word", "excel", 
-                   "notepad", "calculator", "discord", "settings")
+                   "notepad", "calculator", "discord", "settings", "camera", "explorer", "music", "video", "spotify")
             if target.lower() in apps:
                 return _close_application_instance(target.lower(), command)
     
@@ -256,6 +259,11 @@ def _close_application_instance(app_name, command):
         "firefox": ["firefox.exe"],
         "edge": ["msedge.exe"],
         "settings": ["SystemSettings.exe"],
+        "camera": ["WindowsCamera.exe"],
+        "explorer": ["explorer.exe"],
+        "music": ["Music.UI.exe"],
+        "video": ["Video.UI.exe"],
+        "spotify": ["Spotify.exe"],
     }
     
     # Try to find and close the application
