@@ -335,7 +335,6 @@ def _process_remaining_text(text):
             final_clean = gemini_client.strip_json_noise(cleaned)
             
             if final_clean:
-                print(final_clean)
                 speak(final_clean)
                 log_interaction(text, final_clean, source="gemini_stream")
                 
@@ -349,10 +348,8 @@ def _process_remaining_text(text):
             final_clean = gemini_client.strip_json_noise(cleaned)
             
             if final_clean:
-                print(final_clean)
                 speak(final_clean)
             else:
-                print(response)
                 speak(response)
             log_interaction(text, final_clean if final_clean else response, source="gemini")
         else:
