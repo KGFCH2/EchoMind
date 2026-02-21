@@ -120,7 +120,6 @@ def handle_gemini_fallback(command):
                     # Try blocking call as fallback
                     response = gemini_client.generate_response(command)
                     if response and "trouble" not in response.lower():
-                        print(response)
                         speak(response)
                         log_interaction(formatted_command, response, source="gemini_fallback")
                     else:
@@ -135,14 +134,10 @@ def handle_gemini_fallback(command):
                 # Use cleaned response if available, otherwise use final_text
                 response_to_use = final_clean if final_clean else final_text
                 if response_to_use and response_to_use.strip():
-                    # Print and speak ONCE (no ? added to response)
-                    print(response_to_use)
+                    # Speak ONCE (no ? added to response)
+                    # speak() already prints "Speaking: ..."
                     speak(response_to_use)
                     log_interaction(formatted_command, response_to_use, source="gemini_stream")
-                    
-                    # Proactive follow-up
-                    time.sleep(1)
-                    speak("I am listening to you.... please tell me what to do next")
                 else:
                     speak("Sorry, I couldn't generate a response.")
                     log_interaction(formatted_command, "No response returned", source="gemini_stream")
@@ -157,21 +152,11 @@ def handle_gemini_fallback(command):
                 final_clean = gemini_client.strip_json_noise(cleaned)
                 
                 if final_clean:
-                    print(final_clean)
                     speak(final_clean)
                     log_interaction(formatted_command, final_clean, source="gemini")
-                    
-                    # Proactive follow-up
-                    time.sleep(1)
-                    speak("I am listening to you.... please tell me what to do next")
                 else:
-                    print(response)
                     speak(response)
                     log_interaction(formatted_command, response, source="gemini")
-                    
-                    # Proactive follow-up
-                    time.sleep(1)
-                    speak("I am listening to you.... please tell me what to do next")
             else:
                 speak("Sorry, I couldn't generate a response.")
                 log_interaction(formatted_command, "No response returned", source="gemini")
