@@ -7,7 +7,7 @@ import pyautogui
 from config.settings import OS
 from utils.voice_io import speak, listen
 from utils.logger import log_interaction
-import gemini_client
+from clients import gemini_client
 
 
 def handle_file_writing(command):

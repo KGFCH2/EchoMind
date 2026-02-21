@@ -291,7 +291,7 @@ def _process_remaining_text(text):
     BUT: Don't process if text is just app control commands (close, shutdown, etc)
     or common app-related keywords that shouldn't trigger Gemini
     """
-    import gemini_client
+    from clients import gemini_client
     
     # Keywords that shouldn't trigger Gemini processing
     skip_keywords = [

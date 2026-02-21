@@ -3,7 +3,7 @@ import re
 import os
 from utils.voice_io import speak
 from utils.logger import log_interaction
-import gemini_client
+from clients import gemini_client
 from handlers.personal_handler import handle_personal_questions
 from handlers.exit_handler import handle_exit
 from handlers.thank_you_handler import handle_thank_you
