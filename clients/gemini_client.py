@@ -306,24 +306,11 @@ def call_http_endpoint(prompt: str, timeout: float = 15.0) -> Optional[str]:
             if getattr(e, 'response', None) is not None and e.response.status_code == 429:
                 raise QuotaExceededError("Gemini quota exceeded (429)") from e
             raise
-        # Attempt to parse JSON; if it fails we'll log raw text
+        # Try to extract a human-friendly text from the parsed JSON or raw
         try:
             data = resp.json()
         except Exception:
             data = None
-        # Log request/response for debugging (safe: do not log API keys)
-        try:
-            import json as _json, os as _os, datetime as _dt
-            _logdir = _os.path.join(_os.getcwd(), "logs")
-            _os.makedirs(_logdir, exist_ok=True)
-            _entry = {"ts": _dt.datetime.utcnow().isoformat()+"Z", "endpoint": GEMINI_API_ENDPOINT, "prompt": prompt, "response_text": resp.text}
-            with open(_os.path.join(_logdir, "gemini_responses.jsonl"), "a", encoding="utf-8") as _f:
-                _f.write(_json.dumps(_entry, ensure_ascii=False)+"\n")
-        except Exception:
-            pass
-        # Try to extract a human-friendly text from the parsed JSON or raw
-        # response body. This handles cases where the model returns structured
-        # objects or plain text.
         extracted = _extract_text_from_data(data) if data is not None else None
         if extracted:
             return extracted
@@ -373,10 +360,8 @@ def call_google_generate(prompt: str, timeout: float = 15.0, retry_count: int = 
                 return extracted
             return resp.text
         except requests.exceptions.Timeout:
-            print(f"WARNING: API timeout calling {GEMINI_API_ENDPOINT} (attempt {attempt+1}/{retry_count})")
             if attempt < retry_count - 1:
                 wait_time = 2 ** attempt  # Exponential backoff: 1, 2, 4 seconds
-                print(f"  Retrying in {wait_time}s...")
                 time.sleep(wait_time)
             return None
         except requests.exceptions.HTTPError as e:
@@ -385,20 +370,16 @@ def call_google_generate(prompt: str, timeout: float = 15.0, retry_count: int = 
                 status = e.response.status_code
             if status == 429:
                 # Rate limit - retry with backoff
-                print(f"WARNING: API rate limited (429) - (attempt {attempt+1}/{retry_count})")
                 if attempt < retry_count - 1:
                     wait_time = 2 ** (attempt + 1)  # More aggressive backoff for rate limits: 2, 4, 8 seconds
-                    print(f"  Retrying in {wait_time}s...")
                     time.sleep(wait_time)
                     continue
                 else:
                     # Last attempt failed - signal quota exceeded to caller
                     raise QuotaExceededError("Gemini quota exceeded (429)") from e
             else:
-                print(f"WARNING: API HTTP error {resp.status_code}: {e}")
                 return None
         except Exception as e:
-            print(f"WARNING: API error: {e}")
             return None
     
     return None
@@ -476,18 +457,8 @@ def generate_response(prompt: str) -> str:
                     return groq_out
             except Exception:
                 pass
-        except Exception as e:
+        except Exception:
             # On any other error from the primary provider, attempt Groq fallback
-            try:
-                # Log the original error to a local debug file (without secrets)
-                import os as _os, datetime as _dt, traceback as _tb, json as _json
-                _logdir = _os.path.join(_os.getcwd(), "logs")
-                _os.makedirs(_logdir, exist_ok=True)
-                _entry = {"ts": _dt.datetime.utcnow().isoformat()+"Z", "stage": "gemini_http", "error": str(e), "trace": _tb.format_exc().splitlines()[-10:]}
-                with open(_os.path.join(_logdir, "gemini_debug.log"), "a", encoding="utf-8") as _f:
-                    _f.write(_json.dumps(_entry, ensure_ascii=False)+"\n")
-            except Exception:
-                pass
             try:
                 from . import groq_client
                 groq_out = groq_client.generate_response(enhanced_prompt)
@@ -504,16 +475,8 @@ def generate_response(prompt: str) -> str:
         groq_out = groq_client.generate_response(enhanced_prompt)
         if groq_out:
             return groq_out
-    except Exception as e:
-        try:
-            import os as _os, datetime as _dt, traceback as _tb, json as _json
-            _logdir = _os.path.join(_os.getcwd(), "logs")
-            _os.makedirs(_logdir, exist_ok=True)
-            _entry = {"ts": _dt.datetime.utcnow().isoformat()+"Z", "stage": "final_groq_fallback", "error": str(e), "trace": _tb.format_exc().splitlines()[-10:]}
-            with open(_os.path.join(_logdir, "gemini_debug.log"), "a", encoding="utf-8") as _f:
-                _f.write(_json.dumps(_entry, ensure_ascii=False)+"\n")
-        except Exception:
-            pass
+    except Exception:
+        pass
 
     return "I'm having trouble connecting to my AI backend right now. Please try again in a moment."
 
@@ -637,9 +600,8 @@ def stream_generate(prompt: str):
                     return
                 except Exception:
                     pass
-            print(f"WARNING: Streaming HTTP error {getattr(e, 'response', None) and e.response.status_code}: {e}")
         except Exception as e:
-            print(f"WARNING: Streaming failed: {e}")
+            pass
 
     # Fallback: use blocking call instead
     try:
@@ -648,7 +610,7 @@ def stream_generate(prompt: str):
             yield response
             return
     except Exception as e:
-        print(f"WARNING: Fallback generate_response failed: {e}")
+        pass
     
     # Last resort: inform user of API issue
     yield "I'm having trouble reaching the AI service right now. Please try again in a moment."
