@@ -68,6 +68,8 @@ python main_refactored.py
 
 The assistant speaks a greeting and listens in a loop; it will speak responses and run handlers for matched commands.
 
+For a full list of supported voice commands, check out [INSTRUCTIONS.md](./INSTRUCTIONS.md) 📖.
+
 🛠️ Development notes
 -----------------
 
