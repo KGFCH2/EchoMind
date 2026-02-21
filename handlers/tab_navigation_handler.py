@@ -39,8 +39,8 @@ def handle_tab_navigation(command):
     """
     command_lower = command.lower().strip()
     
-    # Check if this is a tab navigation command
-    if not re.search(r'\b(move|go|switch|navigate)\s+(to|to\s+the)?\s*(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last|next|previous|\d+(?:st|nd|rd|th)?|tab)', command_lower):
+    # Relaxed initial check to catch standalone "next tab", "previous tab", "first tab", etc.
+    if not re.search(r'\b(move|go|switch|navigate|next|previous|prev|tab|last|first)\b', command_lower):
         return False
     
     # Pattern 1: Numeric tab numbers - "move to 3rd tab" or "tab 5"
