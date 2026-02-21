@@ -20,12 +20,14 @@ def speak(text):
                 try:
                     subprocess.run(["festival", "--tts"], input=clean_text.encode(), capture_output=True)
                 except FileNotFoundError:
-                    print(f"TTS not available on this Linux system. Text: {clean_text}")
+                    # print(f"TTS not available on this Linux system. Text: {clean_text}")
+                    pass
         else:
-            print(f"TTS not supported on {OS}. Text: {clean_text}")
-    except Exception as e:
-        print(f"Error in speaking: {e}")
-        print(f"Text was: {clean_text}")
+            # print(f"TTS not supported on {OS}. Text: {clean_text}")
+            pass
+    except Exception:
+        # Silently fail or log to file instead
+        pass
 
 
 def speak_stream(chunks, min_buffer: int = 200, pause_on_punctuation: bool = False):
@@ -92,19 +94,10 @@ def listen():
             if attempt == attempts - 1:
                 speak("Sorry, I didn't understand that. Could you repeat?")
             continue
-        except sr.RequestError as e:
-            print(f"Speech service error: {e}")
+        except sr.RequestError:
             speak("Sorry, my speech service is down.")
             break
 
-    # Fallback to typed input
-    try:
-        typed = input("Type your question (or press Enter to skip): ")
-        typed = typed.strip()
-        if typed:
-            print(f"User typed: {typed}")
-            return typed.lower()
-    except Exception:
-        pass
-
+    # Non-blocking check for typed input (only if user explicitly wants it)
+    # Removing mandatory blocking input to keep assistant "Always On" hands-free
     return ""
