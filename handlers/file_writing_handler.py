@@ -127,18 +127,16 @@ def _generate_content(prompt):
 
 
 def _type_into_document(content, delay=0.01):
-    """Type content into the active document using pyautogui
+    """Type content into the active document using pyautogui"""
+    # Use clipboard for anything longer than 20 chars or containing Unicode
+    if len(content) > 20 or any(ord(c) > 127 for c in content):
+        return _type_using_clipboard(content)
     
-    Args:
-        content: Text to type
-        delay: Delay between keystrokes (lower = faster)
-    """
     try:
         # Make sure the document window is in focus
         time.sleep(0.5)
         
         # Type the content character by character
-        # pyautogui.typewrite is slow for large text, so we use write()
         for char in content:
             if char == '\n':
                 pyautogui.press('enter')
@@ -161,20 +159,26 @@ def _type_into_document(content, delay=0.01):
 def _type_using_clipboard(content):
     """Alternative method: Use clipboard to paste content
     
-    This is more reliable for large text
+    This is more reliable for large text and Unicode characters (like Bengali)
     """
     try:
-        import subprocess
-        
-        # Copy content to clipboard
-        process = subprocess.Popen(['clip'], stdin=subprocess.PIPE)
-        process.communicate(content.encode('utf-8'))
-        process.wait()
+        if OS == "windows":
+            # Using PowerShell to set clipboard is much more reliable for Unicode than 'clip'
+            # We encode to base64 to avoid shell escaping issues with complex characters
+            import base64
+            content_bytes = content.encode('utf-16')
+            base64_content = base64.b64encode(content_bytes).decode('utf-8')
+            ps_command = f"$c = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('{base64_content}')); Set-Clipboard -Value $c"
+            subprocess.run(["powershell", "-WindowStyle", "Hidden", "-Command", ps_command], capture_output=True)
+        else:
+            # Fallback for other systems
+            process = subprocess.Popen(['clip'], stdin=subprocess.PIPE)
+            process.communicate(content.encode('utf-8'))
+            process.wait()
         
         # Paste from clipboard
-        time.sleep(0.2)
+        time.sleep(0.5)
         pyautogui.hotkey('ctrl', 'v')
-        
         return True
     except Exception as e:
         print(f"Error using clipboard: {e}")
