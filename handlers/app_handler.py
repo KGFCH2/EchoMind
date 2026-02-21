@@ -156,6 +156,10 @@ def handle_app_opening(command):
                 speak(f"Opening {app}")
                 log_interaction(command, f"Opening {app}", source="local")
                 
+                # Proactive follow-up
+                time.sleep(1)
+                speak("I am listening to you.... please tell me what to do next")
+                
                 # If there's remaining text, process it with Gemini
                 if remaining_text and remaining_text.strip():
                     _process_remaining_text(remaining_text)
@@ -203,6 +207,10 @@ def _open_app_with_windows_search(app, command, remaining_text):
         
         speak(f"Opening {app}")
         log_interaction(command, f"Opening {app} via Windows Search", source="windows_search")
+        
+        # Proactive follow-up
+        time.sleep(1)
+        speak("I am listening to you.... please tell me what to do next")
         
         # If there's remaining text, process it
         if remaining_text and remaining_text.strip():
@@ -254,6 +262,10 @@ def _open_app_legacy(app, app_clean, command, remaining_text):
                 
                 speak(f"Opening {app}")
                 log_interaction(command, f"Opening {app}", source="local")
+                
+                # Proactive follow-up
+                time.sleep(1)
+                speak("I am listening to you.... please tell me what to do next")
                 
                 # If there's remaining text, process it
                 if remaining_text and remaining_text.strip():
