@@ -117,18 +117,36 @@ def _open_system_folder(folder_key, command):
             subprocess.Popen(['explorer', folder_path])
             speak(f"Opening {folder_name} folder")
             log_interaction(command, f"Opened {folder_name} folder: {folder_path}", source="local")
+            
+            # Proactive follow-up
+            import time as _time
+            _time.sleep(1)
+            speak("I am listening to you.... please tell me what to do next")
+            
             return True
         
         elif OS == "darwin":  # macOS
             subprocess.Popen(['open', folder_path])
             speak(f"Opening {folder_name} folder")
             log_interaction(command, f"Opened {folder_name} folder: {folder_path}", source="local")
+            
+            # Proactive follow-up
+            import time as _time
+            _time.sleep(1)
+            speak("I am listening to you.... please tell me what to do next")
+            
             return True
         
         elif OS == "linux":
             subprocess.Popen(['xdg-open', folder_path])
             speak(f"Opening {folder_name} folder")
             log_interaction(command, f"Opened {folder_name} folder: {folder_path}", source="local")
+            
+            # Proactive follow-up
+            import time as _time
+            _time.sleep(1)
+            speak("I am listening to you.... please tell me what to do next")
+            
             return True
     
     except Exception as e:
@@ -158,6 +176,12 @@ def _open_drive(drive_letter, command):
             subprocess.Popen(['explorer', drive_path])
             speak(f"Opening drive {drive_letter}")
             log_interaction(command, f"Opened drive {drive_letter}", source="local")
+            
+            # Proactive follow-up
+            import time as _time
+            _time.sleep(1)
+            speak("I am listening to you.... please tell me what to do next")
+            
             return True
         
         elif OS == "darwin":  # macOS (drives are different)
