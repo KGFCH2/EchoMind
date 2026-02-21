@@ -6,7 +6,7 @@
 
 ## ℹ️ About
 
-I built **EchoMind** as a lightweight, modular AI voice assistant that lives in the terminal. It listens for my spoken commands, intelligently routes them to focused handler modules, and falls back to an LLM (Google Gemini) when a command isn't handled locally. My goal was to create a hands-free assistant that feels alive, stays responsive, and helps me control my entire computer with just my voice.
+I built **EchoMind** as a lightweight, modular AI voice assistant that lives in the terminal. It listens for my spoken commands, intelligently routes them to focused handler modules, and uses dual-provider AI support (**Google Gemini** and **Groq**) to answer anything that isn't handled locally. My goal was to create a hands-free assistant that feels alive, stays responsive, and helps me control my entire computer with just my voice.
 
 ---
 
@@ -14,7 +14,7 @@ I built **EchoMind** as a lightweight, modular AI voice assistant that lives in 
 
 - 🎙️ **Voice I/O** — I integrated speech-to-text and text-to-speech so the assistant can hear me and talk back.
 - 🧩 **Modular Handlers** — I organized the codebase into small, focused handler modules inside `handlers/` (time, date, weather, files, music, system controls, app management, and more).
-- 🌐 **AI Fallback** — When no local handler matches, my assistant forwards the question to Google Gemini (or Groq as a backup) so it can answer virtually anything.
+- 🌐 **AI Intelligence** — When no local handler matches, my assistant forwards the question to **Google Gemini** or **Groq** so it can answer virtually anything.
 - 📝 **Smart Document Writing** — I can ask it to open Notepad or Word and write stories, poems, or even real song lyrics in any language, including Bengali and Hindi.
 - 🔋 **Background Monitoring** — Battery level and USB device detection threads run silently in the background and alert me when something changes.
 - ⌨️ **Global Hotkeys** — I set up F1 for the Emoji Picker and F5 for quick unmute.
@@ -49,6 +49,7 @@ Example `.env` entry:
 
 ```dotenv
 GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 OPENWEATHER_API_KEY=your_openweather_api_key_here
 ```
 
@@ -70,7 +71,7 @@ To enable this, just set `OPENWEATHER_API_KEY` in your `.env`. Temperatures are 
 Start my assistant from the project root:
 
 ```bash
-python main_refactored.py
+python main.py
 ```
 
 It will greet you, then listen in a continuous loop. Speak naturally — it handles the rest. For a full list of what you can say, check out my **[INSTRUCTIONS.md](./INSTRUCTIONS.md)** 📖.
@@ -83,7 +84,7 @@ Here's a quick overview of how I organized everything:
 
 ```
 EchoMind/
-├── main_refactored.py      # 🤖 The main loop and command router
+├── main.py      # 🤖 The main loop and command router
 ├── config/
 │   └── settings.py          # ⚙️ All global settings and mappings
 ├── clients/

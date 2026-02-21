@@ -6,7 +6,7 @@
 
 ## 🎙️ How It Feels to Use
 
-When I run EchoMind, it greets me based on the time of day and immediately starts listening. I speak naturally, and it responds — either by performing an action (opening an app, searching the web) or by answering my question using its AI brain. Here's what I see in my terminal:
+When I run EchoMind, it greets me based on the time of day and immediately starts listening. I speak naturally, and it responds — either by performing an action (opening an app, searching the web) or by answering my question using its AI brain (powered by **Gemini** or **Groq**). Here's what I see in my terminal:
 
 ```
 Speaking: Good evening! I am EchoMind, your voice assistant. How can I help you?
@@ -113,7 +113,7 @@ I can navigate between my open browser tabs completely hands-free:
 I designed EchoMind with a **handler-based architecture**. Every feature lives in its own file, and the main loop just routes commands to the right handler. Here's a 2-sentence summary for every file:
 
 ### 🤖 Core
-*   `main_refactored.py` — This is my central command router. It listens for voice input, matches it against all registered handlers, and falls back to Gemini AI if nothing matches. 🎛️
+*   `main.py` — This is my central command router. It listens for voice input, matches it against all registered handlers, and falls back to Gemini AI if nothing matches. 🎛️
 *   `config/settings.py` — I store all my global configuration here, including OS detection, API key references, website URL maps, and process name mappings. ⚙️
 
 ### 🧠 AI Clients
@@ -154,4 +154,4 @@ I designed EchoMind with a **handler-based architecture**. Every feature lives i
 ---
 
 ### 💡 Pro Tip:
-I power EchoMind with **Google Gemini** as my primary AI. If no local handler matches a command, it gets forwarded to Gemini, making the assistant capable of answering virtually anything. 🚀
+I power EchoMind with **Google Gemini** and **Groq** as its primary AI brains. If no local handler matches a command, it gets forwarded to one of these providers, making the assistant capable of answering virtually anything. 🚀
