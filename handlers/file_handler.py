@@ -37,6 +37,12 @@ def handle_file_opening(command):
         
         speak(f"Opening file explorer")
         log_interaction(command, "Opened file explorer", source="local")
+        
+        # Proactive follow-up
+        import time as _time
+        _time.sleep(1)
+        speak("I am listening to you.... please tell me what to do next")
+        
         return True
     except Exception as e:
         speak("Sorry, I couldn't open the file explorer.")
