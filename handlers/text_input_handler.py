@@ -44,7 +44,6 @@ def handle_text_input(command):
         
         # Prompt user for input
         user_text = input("\n📝 Type your question (or press Enter to skip): ").strip()
-        
         print("="*60 + "\n")
         
         if not user_text:
