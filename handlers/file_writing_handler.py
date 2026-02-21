@@ -13,90 +13,100 @@ from clients import gemini_client
 def handle_file_writing(command):
     """Handle writing content to files (Notepad, Word, etc.)
     
-    Examples:
-    - "Open notepad and write a story"
-    - "Open word and write a bengali story in english"
-    - "Open notepad and write a hindi poem"
+    Supports:
+    - New: "Open notepad and write a story"
+    - Append: "In the current notebook write a bengali song"
     """
-    if not re.search(r'\b(open|launch|start)\b.*\b(notepad|word|document|ms\s+word)\b.*\b(and\s+)?write\b', command, re.IGNORECASE):
+    # Detect intent: Must mention a document app AND a writing action
+    doc_apps = r'\b(notepad|notebook|word|document|ms\s+word|wordpad)\b'
+    write_actions = r'\b(write|add|type|create|generate|put)\b'
+    
+    if not re.search(doc_apps, command, re.IGNORECASE) or not re.search(write_actions, command, re.IGNORECASE):
         return False
     
     command_lower = command.lower()
     
-    # Determine which app to open
-    app_name = None
-    if "notepad" in command_lower:
-        app_name = "notepad"
-    elif "word" in command_lower or "document" in command_lower:
-        app_name = "word"
-    else:
-        return False
+    # Determine if we need to open a new app or use the active one
+    is_open_request = bool(re.search(r'\b(open|launch|start|new)\b', command_lower))
+    is_append = "current" in command_lower or "active" in command_lower or "open" in command_lower or not is_open_request
+    
+    # Determine which app to open (if needed)
+    app_name = "notepad" if "word" not in command_lower else "word"
     
     # Extract the writing prompt
-    write_prompt = None
-    write_match = re.search(r'(?:and\s+)?write\s+(?:a\s+)?(?:.*?)(?:\s+(?:story|poem|essay|article|text))?$', command_lower)
+    write_prompt = "a creative story"
+    write_match = re.search(r'(?:write|add|type|create|generate|put)\s+(?:a\s+)?(.*?)(?:\s+(?:in|to|on)\s+.*)?$', command_lower)
     if write_match:
-        write_prompt = write_match.group(0).replace("and write", "").replace("write", "").strip()
-    
-    # If no specific prompt, ask the user what to write
-    if not write_prompt or len(write_prompt.strip()) < 3:
-        write_prompt = "a creative story"
+        extracted = write_match.group(1).strip()
+        if len(extracted) > 2:
+            write_prompt = extracted
     
     try:
-        # Open the application
-        if OS == "windows":
-            if app_name == "notepad":
-                subprocess.Popen(["notepad.exe"])
-            elif app_name == "word":
-                subprocess.Popen(["winword.exe"])
-        elif OS == "darwin":
-            if app_name == "notepad":
-                subprocess.Popen(["open", "-a", "TextEdit"])
-            elif app_name == "word":
-                subprocess.Popen(["open", "-a", "Microsoft Word"])
-        elif OS == "linux":
-            if app_name == "notepad":
-                subprocess.Popen(["gedit"])
-            elif app_name == "word":
-                subprocess.Popen(["libreoffice", "--writer"])
-        
-        speak(f"Opening {app_name}")
-        
-        # Wait for application to open
-        time.sleep(3)
+        if is_open_request:
+            # Open the application
+            if OS == "windows":
+                if app_name == "notepad":
+                    subprocess.Popen(["notepad.exe"])
+                elif app_name == "word":
+                    subprocess.Popen(["winword.exe"])
+            elif OS == "darwin":
+                subprocess.Popen(["open", "-a", "TextEdit" if app_name == "notepad" else "Microsoft Word"])
+            elif OS == "linux":
+                subprocess.Popen(["gedit" if app_name == "notepad" else "libreoffice --writer"])
+            
+            speak(f"Opening {app_name}")
+            # Wait for application to open
+            time.sleep(3)
+        else:
+            speak(f"Continuing in your active {app_name}")
         
         # Generate content using Gemini
         speak(f"Generating {write_prompt}...")
-        log_interaction(command, f"Opening {app_name} to write {write_prompt}", source="local")
+        log_interaction(command, f"Writing {write_prompt} to {app_name} (append={is_append})", source="local")
         
-        # Use Gemini to generate the content
         content = _generate_content(write_prompt)
         
         if content:
+            # If appending to existing text, add the 5-line gap as requested
+            if is_append and not is_open_request:
+                content = "\n\n\n\n\n" + content
+                
             speak("Writing to the document...")
-            
-            # Type the content into the open document
-            # Use pyautogui to simulate typing
             _type_into_document(content)
             
-            speak(f"Finished writing {write_prompt} to {app_name}")
-            log_interaction(command, f"Wrote {write_prompt} to {app_name}", source="local")
+            speak(f"Finished writing to {app_name}")
+            
+            # Proactive follow-up
+            time.sleep(1)
+            speak("I am listening to you.... please tell me what to do next")
             return True
         else:
             speak("Sorry, I couldn't generate the content.")
             return False
     
     except Exception as e:
-        speak(f"Sorry, there was an error opening {app_name}.")
+        speak(f"Sorry, there was an error with {app_name}.")
         print(f"File writing error: {e}")
         return False
 
 
 def _generate_content(prompt):
-    """Generate content using Gemini API"""
+    """Generate content using Gemini API with special handling for song lyrics"""
     try:
-        # Make sure prompt is a complete request
-        if not any(keyword in prompt.lower() for keyword in ['story', 'poem', 'essay', 'article', 'tale', 'paragraph']):
+        command_lower = prompt.lower()
+        
+        # Check if the user is asking for specific song lyrics
+        is_lyric_request = any(k in command_lower for k in ["song", "lyrics", "bole chudiyan", "tune", "sing"])
+        
+        if is_lyric_request:
+            # Research-focused prompt for accurate lyrics
+            full_prompt = (
+                f"You are a helpful assistant. The user wants the ACTUAL and COMPLETE lyrics for the song: '{prompt}'. "
+                "Please research your knowledge base for the precise lyrics of this song. "
+                "Provide ONLY the lyrics text itself. Avoid generic generated songs. "
+                "If it's a movie song (like from Kabhi Khushi Kabhie Gham), ensure the lyrics are accurate to that film."
+            )
+        elif not any(keyword in command_lower for keyword in ['story', 'poem', 'essay', 'article', 'tale', 'paragraph']):
             full_prompt = f"Write a short {prompt}. Keep it concise and interesting."
         else:
             full_prompt = prompt
