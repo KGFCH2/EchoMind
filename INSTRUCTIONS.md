@@ -18,7 +18,7 @@ Listening...
 ```
 
 * **👁️ Visual Feedback**: I always know what's happening — "Speaking...", "Listening...", "You said: ..." appear in real time.
-* **🗣️ Proactive Follow-up**: After every action, my assistant says *"I am listening to you.... please tell me what to do next"* so I never wonder if it's still active.
+* **🗣️ Smart Follow-up**: After performing specific actions (like opening an app or playing music), my assistant says *"I am listening to you.... please tell me what to do next"* so I know it's ready for the next task. For general questions, it stays silent and waits in the background.
 * **🔄 Non-Blocking**: Even when I switch to Chrome or YouTube, EchoMind keeps listening in the background. It never stops.
 * **😊 Personality**: I can say "Hello", "Thank you", or ask personal questions. It responds warmly.
 
