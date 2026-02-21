@@ -141,22 +141,7 @@ def call_http_endpoint(prompt: str, timeout: float = 15.0) -> Optional[str]:
         except Exception:
             data = None
 
-        # Log non-200 responses for debugging (do not log API keys)
-        if status < 200 or status >= 300:
-            try:
-                import os as _os, datetime as _dt
-                _logdir = _os.path.join(_os.getcwd(), "logs")
-                _os.makedirs(_logdir, exist_ok=True)
-                _entry = {
-                    "ts": _dt.datetime.utcnow().isoformat() + "Z",
-                    "url": url,
-                    "status": status,
-                    "response_snippet": (text or "")[:1000]
-                }
-                with open(_os.path.join(_logdir, "groq_debug.log"), "a", encoding="utf-8") as _f:
-                    _f.write(json.dumps(_entry, ensure_ascii=False) + "\n")
-            except Exception:
-                pass
+        # Raise on HTTP errors to let caller decide fallback behaviour
 
         # Raise on HTTP errors to let caller decide fallback behaviour
         try:
@@ -195,22 +180,7 @@ def call_http_endpoint(prompt: str, timeout: float = 15.0) -> Optional[str]:
             return extracted
 
         return text
-    except Exception as exc:
-        # Log exception details (no secrets)
-        try:
-            import os as _os, datetime as _dt, traceback as _tb
-            _logdir = _os.path.join(_os.getcwd(), "logs")
-            _os.makedirs(_logdir, exist_ok=True)
-            _entry = {
-                "ts": _dt.datetime.utcnow().isoformat() + "Z",
-                "url": url,
-                "error": str(exc),
-                "trace": _tb.format_exc().splitlines()[-10:]
-            }
-            with open(_os.path.join(_logdir, "groq_debug.log"), "a", encoding="utf-8") as _f:
-                _f.write(json.dumps(_entry, ensure_ascii=False) + "\n")
-        except Exception:
-            pass
+    except Exception:
         raise
 
 
