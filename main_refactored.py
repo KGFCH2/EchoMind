@@ -44,7 +44,8 @@ from handlers.emoji_handler import open_emoji, handle_emoji_mode
 from handlers.volume_handler import press_f5_key
 
 # Import Gemini client
-import gemini_client
+from clients import gemini_client
+from clients import groq_client  # Imported for potential fallback, not used directly in main.py
 
 
 def route_command(command):

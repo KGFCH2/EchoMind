@@ -5,14 +5,14 @@
 ℹ️ About
 -----
 
-EchoMind is a lightweight, modular AI voice assistant that runs from the terminal. It listens for spoken commands, routes them to focused handler modules, and falls back to an LLM (via `gemini_client.py`) when a command isn't handled locally.
+EchoMind is a lightweight, modular AI voice assistant that runs from the terminal. It listens for spoken commands, routes them to focused handler modules, and falls back to an LLM (via `clients/gemini_client.py`) when a command isn't handled locally.
 
 ✨ Key features
 ------------
 
 - 🎙️ **Voice I/O**: speech-to-text and text-to-speech via `utils/voice_io.py`.
 - 🧩 **Modular handlers**: small handler modules live in `handlers/` (time, date, weather, files, music, system controls, etc.).
-- 🌐 **LLM fallback**: calls an external model using `gemini_client.py` when needed (configure to enable).
+- 🌐 **LLM fallback**: calls an external model using `clients/gemini_client.py` when needed (configure to enable).
 - 🔋 **Background monitoring**: battery and USB monitoring threads run automatically.
 - ⌨️ **Hotkeys**: optional global hotkey support (F1 / F5) if dependencies are installed.
 
@@ -71,7 +71,7 @@ The assistant speaks a greeting and listens in a loop; it will speak responses a
 🛠️ Development notes
 -----------------
 
-- Entry point: `main_refactored.py` — routes commands to handlers and falls back to `gemini_client.py` when needed.
+- Entry point: `main_refactored.py` — routes commands to handlers and falls back to `clients/gemini_client.py` when needed.
 - Handlers live in `handlers/` and utilities in `utils/`.
 
 📝 Logs
@@ -90,7 +90,7 @@ Interactions and debug logs are written to the `logs/` directory (e.g., `logs/as
 ----------
 
 - Add `OPENWEATHER_API_KEY` to your `.env` to enable weather features.
-- Optionally configure `gemini_client.py` to your LLM provider.
+- Optionally configure `clients/gemini_client.py` to your LLM provider.
 
 📄 License
 -------

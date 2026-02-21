@@ -46,6 +46,15 @@ def handle_personal_questions(command):
         log_interaction(command, response, source="local")
         return True
     
+    # Check if this is about who built/made the assistant
+    if re.search(r'\bwho\s+(built|build|made|make|created)\s+you\b', command, re.IGNORECASE):
+        response = (f"Babin Bid is my creator and the developer of EchoMind. "
+                   f"He built me using {CREATOR_INFO['tech_stack']} and many other technologies "
+                   f"to create a voice assistant that can understand and respond to commands.")
+        speak(response)
+        log_interaction(command, response, source="local")
+        return True
+    
     # Check if there are other explicit intents that override personal questions
     # Include language names to catch queries like "who are you in bengali"
     override_keywords = r'\b(translate|convert|language|meaning|definition|spell|pronounce|write|encode|decode|in\s+(bengali|hindi|spanish|french|german|gujarati|tamil|telugu|kannada|marathi|punjabi|urdu|arabic|chinese|japanese|korean|russian|portuguese|italian|thai|vietnamese))\b'

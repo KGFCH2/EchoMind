@@ -1,11 +1,14 @@
-"""Lightweight Gemini client template.
+"""EchoMind AI - Gemini Client with Groq Fallback
 
-This module provides a small, safe wrapper for reading the GEMINI_API_KEY from
-the environment and shows where to implement real streaming calls to Gemini.
+This module manages requests to the primary AI provider (Google Gemini).
+It includes an automatic fallback mechanism: if the Gemini API returns a 
+quota error (HTTP 429) or fails unexpectedly, the client automatically 
+routes the request to the Groq client to ensure uninterrupted service.
 
-Important: This file does NOT contain any real key and does not make network
-calls. Replace the `stream_response_stub` with an actual implementation that
-uses your provider's streaming SDK or HTTP/gRPC/WebSocket API.
+Key Features:
+1. Primary: Google Gemini (2.0-Flash recommended).
+2. Fallback: Groq Llama 3.1 (triggered on Gemini quota limits).
+3. Support for both blocking (generate_response) and streaming (stream_generate).
 """
 
 import os
@@ -407,10 +410,11 @@ __all__ = ["GEMINI_API_KEY", "GEMINI_API_ENDPOINT", "ensure_key", "stream_respon
 def generate_response(prompt: str) -> str:
     """Convenience blocking helper that returns a full response string.
 
-    Behavior:
-    - If GEMINI_API_ENDPOINT is set, call the HTTP endpoint using the API key
-      and return the best-effort text extraction from the response.
-    - If API fails, return a user-friendly error message instead of stub.
+    Fallback Logic:
+    1. Attempts to call the Gemini API first.
+    2. If Gemini reports a Quota Exceeded (429) error, it immediately calls Groq.
+    3. If the Gemini endpoint is down or times out, it also attempts Groq.
+    4. Returns a friendly error only if both providers fail.
     """
     # Inject current date into prompt for accurate time-based answers
     import datetime
@@ -447,7 +451,7 @@ def generate_response(prompt: str) -> str:
         except QuotaExceededError:
             # Gemini quota exceeded — fall back to Groq
             try:
-                import groq_client
+                from . import groq_client
                 groq_out = groq_client.generate_response(enhanced_prompt)
                 if groq_out:
                     return groq_out
@@ -466,7 +470,7 @@ def generate_response(prompt: str) -> str:
         except QuotaExceededError:
             # Quota exceeded on generic endpoint - try Groq
             try:
-                import groq_client
+                from . import groq_client
                 groq_out = groq_client.generate_response(enhanced_prompt)
                 if groq_out:
                     return groq_out
@@ -485,7 +489,7 @@ def generate_response(prompt: str) -> str:
             except Exception:
                 pass
             try:
-                import groq_client
+                from . import groq_client
                 groq_out = groq_client.generate_response(enhanced_prompt)
                 if groq_out:
                     return groq_out
@@ -496,7 +500,7 @@ def generate_response(prompt: str) -> str:
     # If both API calls failed/returned None, return error message instead of stub
     # Try one last fallback to Groq if configured
     try:
-        import groq_client
+        from . import groq_client
         groq_out = groq_client.generate_response(enhanced_prompt)
         if groq_out:
             return groq_out
@@ -517,10 +521,9 @@ def generate_response(prompt: str) -> str:
 def stream_generate(prompt: str):
     """Generator that yields incremental text chunks.
 
-    Behavior:
-    - If GEMINI_API_STREAM is set (true/1) and GEMINI_API_ENDPOINT is configured,
-      attempt a streaming HTTP POST and yield incoming lines/chunks.
-    - Otherwise, fall back to the blocking call.
+    Fallback Logic:
+    - If Gemini streaming fails or is rate-limited, it automatically 
+      switches to Groq to fulfill the request.
     """
     import re
     import json as _json
@@ -628,7 +631,7 @@ def stream_generate(prompt: str):
             if status == 429:
                 # Quota - try streaming from Groq instead
                 try:
-                    import groq_client
+                    from . import groq_client
                     for chunk in groq_client.stream_generate(prompt):
                         yield chunk
                     return

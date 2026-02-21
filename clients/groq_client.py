@@ -1,9 +1,12 @@
-"""Minimal Groq-compatible client used as a fallback when Gemini quota is exceeded.
+"""EchoMind AI - Groq Client (Fallback Provider)
 
-This module provides `generate_response(prompt)` and `stream_generate(prompt)`
-with behavior similar to `gemini_client` so it can be used interchangeably.
-It intentionally keeps response extraction permissive to match the rest of the
-codebase.
+This module provides an alternative AI provider using Groq's API. 
+In the EchoMind architecture, this client serves as a reliable secondary 
+provider that's triggered automatically if the primary Gemini client 
+hits rate limits (QuotaExceeded) or encounter errors.
+
+It implements the same interface (`generate_response` and `stream_generate`)
+as the Gemini client, making them drop-in replacements for each other.
 """
 import os
 from typing import Optional, Generator
