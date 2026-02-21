@@ -119,6 +119,11 @@ def handle_play_music(command):
                 # Open the video directly
                 _open_video_url(video_url)
                 log_interaction(command, f"YouTube play (direct): {song_query}", source="music")
+                
+                # Proactive follow-up
+                import time as _time
+                _time.sleep(1)
+                speak("I am listening to you.... please tell me what to do next")
             else:
                 # Fallback to search results if direct link fails
                 youtube_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(song_query)}"
@@ -173,6 +178,11 @@ def handle_play_on_youtube(command):
                 # Open the video directly
                 _open_video_url(video_url)
                 log_interaction(command, f"YouTube play (direct): {song_query}", source="music")
+                
+                # Proactive follow-up
+                import time as _time
+                _time.sleep(1)
+                speak("I am listening to you.... please tell me what to do next")
             else:
                 # Fallback to search results
                 youtube_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(song_query)}"
