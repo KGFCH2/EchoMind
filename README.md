@@ -1,23 +1,28 @@
 # EchoMind 🤖
 
-> EchoMind — an AI Voice Assistant through the terminal
+> My AI-powered voice assistant that runs entirely from the terminal.
 
-ℹ️ About
------
+---
 
-EchoMind is a lightweight, modular AI voice assistant that runs from the terminal. It listens for spoken commands, routes them to focused handler modules, and falls back to an LLM (via `clients/gemini_client.py`) when a command isn't handled locally.
+## ℹ️ About
 
-✨ Key features
-------------
+I built **EchoMind** as a lightweight, modular AI voice assistant that lives in the terminal. It listens for my spoken commands, intelligently routes them to focused handler modules, and falls back to an LLM (Google Gemini) when a command isn't handled locally. My goal was to create a hands-free assistant that feels alive, stays responsive, and helps me control my entire computer with just my voice.
 
-- 🎙️ **Voice I/O**: speech-to-text and text-to-speech via `utils/voice_io.py`.
-- 🧩 **Modular handlers**: small handler modules live in `handlers/` (time, date, weather, files, music, system controls, etc.).
-- 🌐 **LLM fallback**: calls an external model using `clients/gemini_client.py` when needed (configure to enable).
-- 🔋 **Background monitoring**: battery and USB monitoring threads run automatically.
-- ⌨️ **Hotkeys**: optional global hotkey support (F1 / F5) if dependencies are installed.
+---
 
-📦 Requirements
-------------
+## ✨ Key Features
+
+- 🎙️ **Voice I/O** — I integrated speech-to-text and text-to-speech so the assistant can hear me and talk back.
+- 🧩 **Modular Handlers** — I organized the codebase into small, focused handler modules inside `handlers/` (time, date, weather, files, music, system controls, app management, and more).
+- 🌐 **AI Fallback** — When no local handler matches, my assistant forwards the question to Google Gemini (or Groq as a backup) so it can answer virtually anything.
+- 📝 **Smart Document Writing** — I can ask it to open Notepad or Word and write stories, poems, or even real song lyrics in any language, including Bengali and Hindi.
+- 🔋 **Background Monitoring** — Battery level and USB device detection threads run silently in the background and alert me when something changes.
+- ⌨️ **Global Hotkeys** — I set up F1 for the Emoji Picker and F5 for quick unmute.
+- 🗣️ **Always Listening** — After every action, my assistant proactively says *"I am listening to you..."* so I never have to wonder if it's still active.
+
+---
+
+## 📦 Requirements
 
 - Python 3.10+
 - Install dependencies:
@@ -26,75 +31,100 @@ EchoMind is a lightweight, modular AI voice assistant that runs from the termina
 pip install -r requirements.txt
 ```
 
-⚙️ Configuration
--------------
+---
 
-- Use a `.env` file (see `.env.example`) or set environment variables directly.
-- Important variables:
-  - `OPENWEATHER_API_KEY` — API key for OpenWeatherMap (required to enable weather features).
-  - `GEMINI_API_KEY` — API key for LLM fallback (optional).
-  - `GEMINI_API_ENDPOINT` / `GEMINI_API_STREAM` — optional LLM configuration.
+## ⚙️ Configuration
 
-🌤️ Weather information
------------------
+I use a `.env` file to manage all my API keys and settings. Here are the important ones:
 
-EchoMind supports weather lookups via OpenWeatherMap:
-
-- Implementation: `utils/weather.py` fetches data from OpenWeatherMap and `handlers/weather_handler.py` and `handlers/simple_weather_handler.py` route weather queries.
-- To enable: set `OPENWEATHER_API_KEY` in your `.env` or environment.
+| Variable | Purpose |
+|---|---|
+| `GEMINI_API_KEY` | My primary AI brain (Google Gemini). |
+| `GEMINI_API_ENDPOINT` | The API endpoint for Gemini. |
+| `GEMINI_API_STREAM` | Set to `true` for streaming responses. |
+| `GROQ_API_KEY` | Backup AI provider (auto-fallback). |
+| `OPENWEATHER_API_KEY` | For real-time weather lookups. |
 
 Example `.env` entry:
 
 ```dotenv
+GEMINI_API_KEY=your_gemini_api_key_here
 OPENWEATHER_API_KEY=your_openweather_api_key_here
 ```
 
-Example voice/text queries:
+---
 
-- "What's the weather in London?"
-- "London weather"
-- "Paris"
+## 🌤️ Weather Information
 
-Note: Temperatures are returned in Celsius by default (see `utils/weather.py`). If you need a different unit, update the `units` parameter in the API request.
+I integrated OpenWeatherMap so I can ask about the weather in any city:
 
-▶️ Running EchoMind
-----------------
+- *"What's the weather in London?"*
+- *"Kolkata weather"*
 
-Start the assistant from the project root:
+To enable this, just set `OPENWEATHER_API_KEY` in your `.env`. Temperatures are returned in Celsius by default.
+
+---
+
+## ▶️ Running EchoMind
+
+Start my assistant from the project root:
 
 ```bash
 python main_refactored.py
 ```
 
-The assistant speaks a greeting and listens in a loop; it will speak responses and run handlers for matched commands.
+It will greet you, then listen in a continuous loop. Speak naturally — it handles the rest. For a full list of what you can say, check out my **[INSTRUCTIONS.md](./INSTRUCTIONS.md)** 📖.
 
-For a full list of supported voice commands, check out [INSTRUCTIONS.md](./INSTRUCTIONS.md) 📖.
+---
 
-🛠️ Development notes
------------------
+## 🏗️ Project Structure
 
-- Entry point: `main_refactored.py` — routes commands to handlers and falls back to `clients/gemini_client.py` when needed.
-- Handlers live in `handlers/` and utilities in `utils/`.
+Here's a quick overview of how I organized everything:
 
-📝 Logs
-----
+```
+EchoMind/
+├── main_refactored.py      # 🤖 The main loop and command router
+├── config/
+│   └── settings.py          # ⚙️ All global settings and mappings
+├── clients/
+│   ├── gemini_client.py     # 🧠 Primary AI (Google Gemini)
+│   └── groq_client.py       # 🔄 Backup AI (Groq Llama)
+├── handlers/                # 🧩 One file per feature
+│   ├── app_handler.py       # Open apps
+│   ├── close_app_handler.py # Close apps & tabs
+│   ├── music_handler.py     # YouTube music
+│   ├── file_writing_handler.py  # AI-powered document writing
+│   ├── web_handler.py       # Web search & browsing
+│   ├── weather_handler.py   # Weather lookups
+│   ├── tab_navigation_handler.py # Browser tab control
+│   └── ...more handlers
+├── utils/
+│   ├── voice_io.py          # 🎙️ Speech recognition & TTS
+│   ├── text_processing.py   # 🧹 Text cleanup utilities
+│   └── logger.py            # 📓 Interaction logging
+├── INSTRUCTIONS.md           # 📖 Full user guide
+└── .env                      # 🔑 API keys (not committed)
+```
 
-Interactions and debug logs are written to the `logs/` directory (e.g., `logs/assistant.jsonl`).
+---
 
-❗ Troubleshooting
----------------
+## 📝 Logs
 
-- If voice I/O fails, ensure microphone and speakers are accessible and dependencies are installed.
-- If weather lookups fail, verify `OPENWEATHER_API_KEY` is set and valid.
-- If LLM responses are missing, set `GEMINI_API_KEY` and/or `GEMINI_API_ENDPOINT`.
+I log every interaction and error to the `logs/` directory (e.g., `logs/assistant.jsonl`) so I can review conversations and debug issues later.
 
-➡️ Next steps
-----------
+---
 
-- Add `OPENWEATHER_API_KEY` to your `.env` to enable weather features.
-- Optionally configure `clients/gemini_client.py` to your LLM provider.
+## ❗ Troubleshooting
 
-📄 License
--------
+| Problem | Solution |
+|---|---|
+| Voice I/O fails | Make sure your microphone and speakers are connected and dependencies are installed. |
+| Weather lookups fail | Verify that `OPENWEATHER_API_KEY` is set and valid in your `.env`. |
+| AI responses are missing | Ensure `GEMINI_API_KEY` and `GEMINI_API_ENDPOINT` are configured. |
+| Bengali/Hindi text not showing | The clipboard method requires PowerShell on Windows. |
 
-This project is licensed under the MIT License — see `LICENSE` for details.
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see `LICENSE` for details.
