@@ -8,7 +8,7 @@
 
 When I run EchoMind, it greets me based on the time of day and immediately starts listening. I speak naturally, and it responds — either by performing an action (opening an app, searching the web) or by answering my question using its AI brain (powered by **Gemini** or **Groq**). Here's what I see in my terminal:
 
-```
+```text
 Speaking: Good evening! I am EchoMind, your voice assistant. How can I help you?
 Listening...
 You said: open chrome
@@ -106,7 +106,7 @@ I can navigate between my open browser tabs completely hands-free:
 ## ⚙️ System Controls
 
 | Command | What It Does | Emoji |
-|---|---|---|
+| :--- | :--- | :--- |
 | *"Volume up"* / *"Volume down"* | Adjusts system volume | 🔊 |
 | *"Mute"* | Mutes the system | 🔇 |
 | *"Set brightness to 70%"* | Sets screen brightness | ☀️ |
