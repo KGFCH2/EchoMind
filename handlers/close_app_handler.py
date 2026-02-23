@@ -48,15 +48,20 @@ def handle_app_closing(command):
     if any(keyword in command_lower for keyword in exit_keywords):
         return False  # Don't process - let exit handler handle this
     
-    # PATTERN 0: Close current/active tab - "close the current tab" or "close this tab"
-    if re.search(r'(?:close|shut|kill)\s+(?:the\s+)?(?:current|this|active)\s+tab', command_lower):
-        speak("Closing current tab")
-        _close_tab_with_hotkey(command)
-        log_interaction(command, "Closed current tab using Ctrl+W", source="local")
-        return True
+    # Check for explicit close/shut/kill/minimize commands
+    has_close_word = re.search(r'\b(close|shut|kill|terminate|stop|minimise|minimize)\b', command_lower)
     
-    # Check for explicit close/shut/kill commands
-    has_close_word = re.search(r'\b(close|shut|kill|terminate|stop)\b', command_lower)
+    # PATTERN 0: Close/Minimize current/active tab/window
+    if re.search(r'(?:close|shut|kill|minimise|minimize)\s+(?:the\s+)?(?:current|this|active)\s+tab', command_lower):
+        if "minimise" in command_lower or "minimize" in command_lower:
+            speak("Minimizing current window")
+            _minimize_window_with_hotkey(command)
+            log_interaction(command, "Minimized current window", source="local")
+        else:
+            speak("Closing current tab")
+            _close_tab_with_hotkey(command)
+            log_interaction(command, "Closed current tab using Ctrl+W", source="local")
+        return True
     
     # Check if user is asking about tabs (more specific: "tab" not followed by "le" or "let")
     # This prevents matching "table", "tablet", "tablespoon", etc.
@@ -172,6 +177,40 @@ def _close_tab_with_hotkey(command):
             return False
     except Exception as e:
         speak("Could not close the tab. Please close it manually.")
+        print(f"Error: {e}")
+        return False
+
+def _minimize_window_with_hotkey(command):
+    """Minimize the active window using keyboard shortcut (Win+M)"""
+    try:
+        import pyautogui
+        
+        # Send Win+M to minimize windows
+        if OS == "windows":
+            pyautogui.hotkey('win', 'm')
+        elif OS == "darwin":  # macOS
+            pyautogui.hotkey('command', 'm')
+        
+        time.sleep(0.5)
+        log_interaction(command, "Minimized window using hotkey", source="local")
+        return True
+        
+    except ImportError:
+        try:
+            import keyboard
+            if OS == "windows":
+                keyboard.press_and_release('windows+m')
+            elif OS == "darwin":
+                keyboard.press_and_release('command+m')
+            
+            time.sleep(0.5)
+            log_interaction(command, "Minimized window using keyboard", source="local")
+            return True
+        except:
+            speak("Please minimize manually")
+            return False
+    except Exception as e:
+        speak("Could not minimize. Please do it manually.")
         print(f"Error: {e}")
         return False
 
