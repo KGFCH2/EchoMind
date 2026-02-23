@@ -1,5 +1,4 @@
-"""Battery Monitoring Handler - Monitors device battery level"""
-import os
+import re
 import threading
 import time
 from utils.voice_io import speak
@@ -202,10 +201,27 @@ def stop_battery_monitoring():
 
 def handle_battery_status(command):
     """Handle battery status queries"""
-    if not any(word in command.lower() for word in ['battery', 'charge', 'charging']):
+    command_lower = command.lower()
+    
+    # Check for battery keywords
+    if not any(word in command_lower for word in ['battery', 'charge', 'charging']):
+        return False
+        
+    # EXCLUSION: If it's a "how to", "what should I do", "healthy", or "configure" query,
+    # let Gemini/AI handle it as it's a general question, not a status check.
+    nuance_keywords = ['how to', 'what should', 'should i', 'healthy', 'config', 'improve', 'save', 'life', 'setting']
+    if any(word in command_lower for word in nuance_keywords):
         return False
     
-    battery_level, is_charging = get_battery_info()
+    # Common status query patterns
+    status_patterns = [
+        r'\bstatus\b', r'\blevel\b', r'\bpercent\b', r'\bmuch\b', r'\bstate\b',
+        r'\bwhat is\b', r'\btell me\b', r'\bcheck\b', r'^battery$', r'^charge$'
+    ]
+    
+    # If it contains any status pattern or is a simple "battery" command
+    if any(re.search(pattern, command_lower) for pattern in status_patterns) or len(command_lower.split()) <= 2:
+        battery_level, is_charging = get_battery_info()
     
     if is_charging:
         message = f"Battery is {battery_level} percent and currently charging"
