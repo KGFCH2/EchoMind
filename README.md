@@ -38,7 +38,7 @@ pip install -r requirements.txt
 I use a `.env` file to manage all my API keys and settings. Here are the important ones:
 
 | Variable | Purpose |
-|---|---|
+| :--- | :--- |
 | `GEMINI_API_KEY` | My primary AI brain (Google Gemini). |
 | `GEMINI_API_ENDPOINT` | The API endpoint for Gemini. |
 | `GEMINI_API_STREAM` | Set to `true` for streaming responses. |
@@ -82,7 +82,8 @@ It will greet you, then listen in a continuous loop. Speak naturally — it hand
 
 Here's a quick overview of how I organized everything:
 
-```
+```text
+
 EchoMind/
 ├── main.py      # 🤖 The main loop and command router
 ├── config/
@@ -118,7 +119,7 @@ I log every interaction and error to the `logs/` directory (e.g., `logs/assistan
 ## ❗ Troubleshooting
 
 | Problem | Solution |
-|---|---|
+| :--- | :--- |
 | Voice I/O fails | Make sure your microphone and speakers are connected and dependencies are installed. |
 | Weather lookups fail | Verify that `OPENWEATHER_API_KEY` is set and valid in your `.env`. |
 | AI responses are missing | Ensure `GEMINI_API_KEY` and `GEMINI_API_ENDPOINT` are configured. |
