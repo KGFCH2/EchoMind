@@ -13,10 +13,6 @@ def handle_web_search(command):
     webbrowser.open(url)
     speak(f"Searching for {command} on Google")
     log_interaction(command, f"Search opened: {command}", source="local")
-    
-    # Proactive follow-up
-    time.sleep(1)
-    speak("I am listening to you.... please tell me what to do next")
 
 
 def handle_whatsapp_web(command):
@@ -166,10 +162,6 @@ def handle_browser_search(command):
             speak(f"Searching for {query} on {browser_name}")
             log_interaction(command, f"Opened {query} on {browser_name}", source="local")
             
-            # Proactive follow-up
-            time.sleep(1)
-            speak("I am listening to you.... please tell me what to do next")
-            
             return True
         except Exception as e:
             speak("Sorry, I couldn't open that in the browser.")
@@ -203,10 +195,6 @@ def handle_website_opening(command):
                 subprocess.Popen(["google-chrome", url])
             speak(f"Opening {website}")
             log_interaction(command, f"Opened {website}", source="local")
-            
-            # Proactive follow-up
-            time.sleep(1)
-            speak("I am listening to you.... please tell me what to do next")
             
             return True
         except Exception as e:
