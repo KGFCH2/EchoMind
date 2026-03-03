@@ -2,6 +2,50 @@
 import subprocess
 import speech_recognition as sr
 from config.settings import OS
+import sounddevice as sd
+
+class SoundDeviceMicrophone(sr.AudioSource):
+    """Custom microphone wrapper to substitute PyAudio with sounddevice."""
+    def __init__(self, device_index=None, sample_rate=None, chunk_size=1024):
+        self.device_index = device_index
+        self.format = 8
+        self.SAMPLE_WIDTH = 2
+        if sample_rate is None:
+            device_info = sd.query_devices(device_index, 'input')
+            self.SAMPLE_RATE = int(device_info['default_samplerate'])
+        else:
+            self.SAMPLE_RATE = sample_rate
+        self.CHUNK = chunk_size
+        self.audio = None
+        self.stream = None
+
+    def __enter__(self):
+        assert self.stream is None, "This audio source is already inside a context manager"
+        self.audio = sd.RawInputStream(
+            samplerate=self.SAMPLE_RATE,
+            channels=1,
+            dtype='int16',
+            blocksize=self.CHUNK,
+            device=self.device_index
+        )
+        self.audio.start()
+        
+        class StreamWrapper:
+            def __init__(self, raw_stream):
+                self.raw_stream = raw_stream
+            def read(self, size):
+                data, overflow = self.raw_stream.read(size)
+                return bytes(data)
+                
+        self.stream = StreamWrapper(self.audio)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.audio:
+            self.audio.stop()
+            self.audio.close()
+        self.stream = None
+        self.audio = None
 
 def speak(text):
     """Cross-platform text-to-speech"""
@@ -20,13 +64,10 @@ def speak(text):
                 try:
                     subprocess.run(["festival", "--tts"], input=clean_text.encode(), capture_output=True)
                 except FileNotFoundError:
-                    # print(f"TTS not available on this Linux system. Text: {clean_text}")
                     pass
         else:
-            # print(f"TTS not supported on {OS}. Text: {clean_text}")
             pass
     except Exception:
-        # Silently fail or log to file instead
         pass
 
 
@@ -56,7 +97,7 @@ def speak_stream(chunks, min_buffer: int = 200, pause_on_punctuation: bool = Fal
 
 
 def listen():
-    """Function to listen to user's voice command"""
+    """Function to listen to user's voice command using sounddevice + Google Speech Recognition"""
     recognizer = sr.Recognizer()
     attempts = 3
     ambient_duration = 1.5
@@ -70,7 +111,7 @@ def listen():
         pass
 
     for attempt in range(attempts):
-        with sr.Microphone() as source:
+        with SoundDeviceMicrophone() as source:
             print("Listening...")
             try:
                 recognizer.adjust_for_ambient_noise(source, duration=ambient_duration)
