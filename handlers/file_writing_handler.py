@@ -46,9 +46,9 @@ def handle_file_writing(command):
             # Open the application
             if OS == "windows":
                 if app_name == "notepad":
-                    subprocess.Popen(["notepad.exe"])
+                    subprocess.run(["cmd", "/c", "start", "notepad"], shell=True)
                 elif app_name == "word":
-                    subprocess.Popen(["winword.exe"])
+                    subprocess.run(["cmd", "/c", "start", "winword"], shell=True)
             elif OS == "darwin":
                 subprocess.Popen(["open", "-a", "TextEdit" if app_name == "notepad" else "Microsoft Word"])
             elif OS == "linux":
