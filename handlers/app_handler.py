@@ -106,19 +106,15 @@ def handle_app_opening(command):
     for prefix in ["open ", "launch ", "start "]:
         if command_lower.startswith(prefix):
             remainder = command[len(prefix):].strip()
-            app_words = remainder.split()
             
-            if len(app_words) >= 2:
-                first_word = app_words[0].lower()
-                if "microsoft" in first_word or first_word == "ms":
-                    app = " ".join(app_words[:2])
-                    remaining_text = " ".join(app_words[2:]) if len(app_words) > 2 else None
-                elif first_word in COMMON_APPS:
-                    app = first_word
-                    remaining_text = " ".join(app_words[1:]) if len(app_words) > 1 else None
-                else:
-                    app = first_word
-                    remaining_text = " ".join(app_words[1:]) if len(app_words) > 1 else None
+            # Split by " and " or " to "
+            split_match = re.search(r'\s+(and|to)\s+', remainder, re.IGNORECASE)
+            if split_match:
+                separator = split_match.group(0)
+                # Split only on the first occurrence
+                parts = re.split(r'\s+(?:and|to)\s+', remainder, 1, flags=re.IGNORECASE)
+                app = parts[0].strip()
+                remaining_text = separator.strip() + " " + parts[1].strip()
             else:
                 app = remainder
                 remaining_text = None
