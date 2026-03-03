@@ -101,3 +101,25 @@ def ensure_question_mark_if_question(command, response=None):
             command = command + '?'
     
     return command
+
+def ensure_proper_punctuation(command):
+    """Ensure transcribed text is well-capitalized with correct ending punctuation."""
+    if not command:
+        return command
+    
+    command = command.strip()
+    if not command:
+        return command
+    
+    # Capitalize first letter
+    command = command[0].upper() + command[1:]
+    
+    if is_question(command):
+        command = re.sub(r'[.!]+$', '', command).strip()
+        if not command.endswith('?'):
+            command = command + '?'
+    else:
+        if not re.search(r'[.!?]$', command):
+            command = command + '.'
+            
+    return command
