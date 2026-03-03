@@ -31,7 +31,9 @@ from handlers.music_handler import handle_play_music, handle_play_on_youtube
 from handlers.exit_handler import handle_exit
 from handlers.battery_handler import handle_battery_status, start_battery_monitoring, stop_battery_monitoring
 from handlers.usb_detection_handler import handle_usb_detection, start_usb_monitoring, stop_usb_monitoring
+from handlers.reminder_handler import handle_reminder
 from handlers.volume_handler import handle_volume
+from handlers.cricket_handler import handle_cricket_score
 
 # Import utilities
 from utils.voice_io import speak, listen, speak_stream
@@ -63,6 +65,7 @@ def route_command(command):
         ("Website opening", handle_website_opening),
         ("Simple city weather", handle_simple_city_weather),
         ("Weather", handle_weather),
+        ("Cricket Score", handle_cricket_score),
         ("WhatsApp", handle_whatsapp_web),
         ("Battery status", handle_battery_status),
         ("Volume control", handle_volume),
@@ -75,6 +78,7 @@ def route_command(command):
         ("Personal questions", handle_personal_questions),
         ("Brightness control", handle_brightness),
         ("Tab navigation", handle_tab_navigation),
+        ("Reminder", handle_reminder),
         ("App closing", handle_app_closing),
         ("Exit", handle_exit),
     ]
@@ -146,7 +150,11 @@ def handle_gemini_fallback(command):
                 # Fallback to block generation silently or with minimal notice
                 pass
         else:
-            response = gemini_client.generate_response(command)
+            # Add dynamic context (date/time) to the prompt for Gemini
+            from utils.time_utils import get_time, get_date
+            context_command = f"[Context: The current time is {get_time()} and today is {get_date()}] {command}"
+            
+            response = gemini_client.generate_response(context_command)
             if response:
                 cleaned = gemini_client.normalize_response(response)
                 final_clean = gemini_client.strip_json_noise(cleaned)
@@ -252,8 +260,11 @@ def main():
                     # No handler matched, try Gemini
                     handle_gemini_fallback(formatted_command)
                     time.sleep(0.5)  # Small delay between API calls to avoid rate limiting
+            except KeyboardInterrupt:
+                speak("Goodbye!")
+                break
             except Exception as e:
-                # Silent restart on internal glitches
+                print(f"Error in main loop: {e}")
                 time.sleep(1)
                 continue
     finally:
@@ -263,4 +274,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nShutting down gracefully...")
+        # Cleanup is handled in main()'s finally block
