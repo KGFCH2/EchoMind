@@ -12,6 +12,7 @@ OS = platform.system().lower()
 # API Keys from environment
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+CRICKETDATA_API_KEY = os.getenv("CRICKETDATA_API_KEY", "89e10f96-68cc-437a-bdd3-f8124614959a")
 
 if not GEMINI_API_KEY:
     print("Warning: GEMINI_API_KEY not set. Gemini features will be disabled until you set this environment variable.")
