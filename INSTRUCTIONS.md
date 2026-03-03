@@ -91,6 +91,11 @@ I can navigate between my open browser tabs completely hands-free:
 * *"Search for Python tutorials on Chrome"*
 * *"Google latest news"*
 
+### 🏏 Live Cricket Scores
+
+* *"Live cricket score"*
+* *"Cricket match score"*
+
 ### 🎵 Music & YouTube
 
 * *"Play Shape of You on YouTube"*
@@ -100,6 +105,16 @@ I can navigate between my open browser tabs completely hands-free:
 
 * *"Open WhatsApp Web"*
 * *"Open Instagram"*, *"Open YouTube"*, *"Open GitHub"*.
+
+---
+
+### 🔔 Smart Reminders
+
+EchoMind can act as your personal assistant for tasks and time-sensitive alerts:
+
+* *"Remind me at 9:48 PM"* — Sets a precise reminder. ⏰
+* *"What are my reminders?"* — Lists all active pending reminders. 📋
+* *"Cancel reminder for 10:00 PM"* — Removes a specific reminder from the list. 🗑️
 
 ---
 
@@ -123,52 +138,86 @@ I can navigate between my open browser tabs completely hands-free:
 
 ---
 
-## 🏗️ How I Built It — Developer Recap
+## 🏗️ The EchoMind Architecture: Full Documentation
 
-I designed EchoMind with a **handler-based architecture**. Every feature lives in its own file, and the main loop just routes commands to the right handler. Here's a 2-sentence summary for every file:
+I designed EchoMind with a modular, **handler-based architecture**. This means every feature is isolated in its own file, making the system easy to update and debug.
 
-### 🤖 Core
+### 📂 1. Project Root Directories
 
-* `main.py` — This is my central command router. It listens for voice input, matches it against all registered handlers, and falls back to Gemini AI if nothing matches. 🎛️
-* `config/settings.py` — I store all my global configuration here, including OS detection, API key references, website URL maps, and process name mappings. ⚙️
+* **`clients/`**: Contains the AI service wrappers that connect EchoMind to external LLMs (Large Language Models).
+* **`config/`**: Stores global configuration settings, environment variables, and platform-specific mappings.
+* **`handlers/`**: The "Muscle" of the project. Contains over 25 individual modules that perform specific actions on your system.
+* **`utils/`**: The "Senses" and "Nerves." Contains helper scripts for voice input/output, logging, and data formatting.
+* **`logs/`**: Automatically generated folder that stores your interaction history in `.jsonl` format for later review.
+* **`models/`**: (Optional/Hidden) Stores offline machine learning models (like Vosk) for offline speech recognition.
 
-### 🧠 AI Clients
+---
 
-* `clients/gemini_client.py` — My primary AI brain. It calls Google Gemini's API, handles rate-limit fallback to Groq, parses JSON responses, and cleans up the output for natural speech. 🧠
-* `clients/groq_client.py` — My backup AI provider. If Gemini hits its rate limit (HTTP 429), this client takes over automatically using Groq's Llama model. 🔄
+### 📄 2. Root Files (The Core)
 
-### 🧩 Handlers
+* **`main.py`**: The brain of the assistant. It initializes all components, starts background threads, and contains the main loop that routes your voice to the correct handler. 🎛️
+* **`.env`**: (Hidden) Stores your secret API keys (Gemini, Groq, Weather, Cricket). This file is ignored by Git for security. 🔑
+* **`.env.example`**: A template file showing you what keys you need to add to your own `.env` file. 📑
+* **`.gitignore`**: Tells Git which files to ignore (like `.env`, `__pycache__`, and `models/`) to keep the repository clean. 🚫
+* **`.free_apis.md`**: (Hidden) A curated list of free APIs I discovered that can be used to add more live data to EchoMind. 🌐
+* **`requirements.txt`**: Lists all Python libraries needed to run the project (e.g., `speechrecognition`, `pyautogui`, `sounddevice`). 📦
+* **`README.md`**: The main landing page of the project with a high-level overview. 📖
+* **`INSTRUCTIONS.md`**: This file! A comprehensive guide for users and developers. 📖
+* **`FUTURE_FEATURES.md`**: A roadmap of what I plan to build next for EchoMind. 🚀
+* **`LICENSE`**: The legal license (MIT) governing how this code can be used. ⚖️
 
-* `handlers/app_handler.py` — I wrote this to find and launch any desktop application. It searches common installation paths on Windows and Linux to locate executables. 📥
-* `handlers/close_app_handler.py` — This handles closing apps and tabs. It uses `taskkill` for full app termination and `Ctrl+W` for closing individual browser tabs. 📤
-* `handlers/music_handler.py` — My music player. It scrapes YouTube search results to find the top video URL and opens it directly in my browser. 🎶
-* `handlers/file_writing_handler.py` — I'm proud of this one. It opens Notepad/Word, generates content via AI, and types it into the document. I added Unicode clipboard support for Bengali/Hindi. ✍️
-* `handlers/web_handler.py` — This manages all web-related actions: Google searches, opening specific websites, and launching WhatsApp Web. 🌐
-* `handlers/system_folder_handler.py` — My file system navigator. It opens Windows folders like Downloads, Desktop, or specific drives, and can safely eject USB drives. 📂
-* `handlers/weather_handler.py` — Fetches live weather data from OpenWeatherMap and speaks the temperature, humidity, and conditions for any city I ask about. 🌤️
-* `handlers/simple_weather_handler.py` — A lighter version of the weather handler that catches simple queries like just saying a city name. 🌡️
-* `handlers/battery_handler.py` — Runs a background thread that monitors my battery level. It warns me at 20% and announces when charging starts or stops. 🔋
-* `handlers/usb_detection_handler.py` — Watches for USB devices being plugged in or removed and announces the change immediately. 🔌
-* `handlers/time_handler.py` — A simple handler that tells me the current time when I ask. ⏰
-* `handlers/date_handler.py` — Similar to time, but for the calendar date and day of the week. 📅
-* `handlers/brightness_handler.py` — Controls my screen brightness using system commands or simulated keyboard input. ☀️
-* `handlers/volume_handler.py` — Adjusts my system volume — I can say "volume up", "volume down", or set a specific percentage. 🔊
-* `handlers/tab_navigation_handler.py` — My hands-free browser navigator. It sends Ctrl+Tab, Ctrl+Shift+Tab, or Ctrl+[number] to switch between tabs. 📑
-* `handlers/text_input_handler.py` — If I ever prefer typing over speaking, this activates a manual text input mode in the terminal. ⌨️
-* `handlers/emoji_handler.py` — Triggers the Windows Emoji Picker (Win+.) when I press F1 or say "open emoji". �
-* `handlers/greeting_handler.py` — Makes EchoMind feel human. It responds to "Hello", "Hi", and friendly greetings with warmth. 👋
-* `handlers/thank_you_handler.py` — I taught it manners. It replies politely when I say "Thank you" or "Thanks". 😊
-* `handlers/personal_handler.py` — It knows who created it and can answer questions about its identity or purpose. 👨‍💻
-* `handlers/resume_handler.py` — A personal utility I built to quickly open my resume file from a specific path on my system. �
-* `handlers/exit_handler.py` — Handles graceful shutdown. It stops all background threads, says "Goodbye!", and exits the loop cleanly. 🚪
+---
 
-### 🛠️ Utilities
+### 🧠 3. `clients/` — The AI Brains
 
-* `utils/voice_io.py` — The ears and mouth of EchoMind. It handles microphone input via `speech_recognition` and text-to-speech output via platform-specific tools. 🎙️
-* `utils/text_processing.py` — Cleans up spoken input by converting symbols, removing noise, and formatting questions with proper punctuation. 🧹
-* `utils/time_utils.py` — A small utility that generates time-based greetings like "Good morning" or "Good evening". 🕐
-* `utils/logger.py` — Every interaction gets logged to `logs/assistant.jsonl` so I can review conversations and debug issues later. 📓
-* `utils/weather.py` — Calls the OpenWeatherMap API and returns structured weather data that my handlers can speak. 🌦️
+* **`gemini_client.py`**: My primary AI provider. It manages the connection to Google Gemini 2.5, handles JSON parsing, and cleans up text for speech. 🧠
+* **`groq_client.py`**: The fallback AI provider. If Gemini is busy or hits a rate limit, this automatically takes over using Llama 3 models via Groq. 🔄
+
+---
+
+### ⚙️ 4. `config/` — Global Settings
+
+* **`settings.py`**: The central source of truth for all constants. It handles OS detection (Windows vs. Linux), defines app paths, and maps URLs for the web handler. ⚙️
+
+---
+
+### 🧩 5. `handlers/` — Every Individual Feature
+
+* **`app_handler.py`**: Finds and launches any application (Chrome, Word, etc.) by searching Windows registry and system paths. 📥
+* **`battery_handler.py`**: Monitors battery levels in the background and speaks alerts when charging starts or power is low. 🔋
+* **`brightness_handler.py`**: Controls screen brightness using system-level WMI commands. ☀️
+* **`close_app_handler.py`**: Closes entire applications (taskkill) or specific browser tabs (Ctrl+W) smartly. 📤
+* **`cricket_handler.py`**: Scrapes and speaks real-time cricket scores using the CricketData API. 🏏
+* **`date_handler.py`**: Answers questions about today's date, day, month, and year. 📅
+* **`emoji_handler.py`**: Opens the Windows Emoji Picker (Win+.) for quick typing. 😀
+* **`exit_handler.py`**: Shuts down EchoMind gracefully, stopping all threads and saying goodbye. 🚪
+* **`file_handler.py`**: Logic for opening specific files or system folders like Desktop and Downloads. 📂
+* **`file_writing_handler.py`**: The AI writer. It opens Notepad/Word, generates content, and types it in (supports Bengali/Unicode). ✍️
+* **`greeting_handler.py`**: Handles polite opening conversations like "Hello" and "How are you?". 👋
+* **`music_handler.py`**: Scrapes YouTube for any song name you say and plays the top result instantly. 🎶
+* **`personal_handler.py`**: Contains identity info about EchoMind and its creator. 👨‍💻
+* **`reminder_handler.py`**: The voice-activated reminder service. It sets and monitors background timers. 🔔
+* **`resume_handler.py`**: A specific utility to immediately open the creator's resume file. 📄
+* **`simple_weather_handler.py`**: A lightweight weather catcher for simple "City Name" queries. 🌡️
+* **`system_folder_handler.py`**: Opens system drives (C:, D:) and handles safe USB ejection. 📂
+* **`tab_navigation_handler.py`**: Hands-free browser control (Next Tab, Previous Tab, 1st Tab, etc.). 📑
+* **`text_input_handler.py`**: Switches the assistant to "Text Mode" for those who prefer typing over speaking. ⌨️
+* **`thank_you_handler.py`**: Responds politely to "Thank you" and "Thanks". 😊
+* **`time_handler.py`**: Tells the current time with high precision. ⏰
+* **`usb_detection_handler.py`**: Background thread that detects when USB devices are plugged in or unplugged. 🔌
+* **`volume_handler.py`**: Controls system volume percentages and muting. 🔊
+* **`weather_handler.py`**: Detailed weather reporter using the OpenWeatherMap API City/Country search. 🌤️
+* **`web_handler.py`**: Manages Google searches, YouTube searches, and opening specific websites like WhatsApp Web. 🌐
+
+---
+
+### 🛠️ 6. `utils/` — Helper Utilities
+
+* **`voice_io.py`**: The physical link to your hardware. It manages the Microphone (SoundDevice) and the Voice (TTsx3). 🎙️
+* **`text_processing.py`**: Cleans up messy speech-to-text transcripts, adds punctuation, and converts symbols. 🧹
+* **`time_utils.py`**: Small logic to determine if it's currently Morning, Afternoon, or Evening. 🕐
+* **`logger.py`**: The recorder. It writes every conversation to a JSON log file so you can audit the AI's behavior. 📓
+* **`weather.py`**: The backend API logic that fetches raw JSON data from weather servers. 🌦️
 
 ---
 
