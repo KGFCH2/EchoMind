@@ -1,4 +1,5 @@
 speechrecognition
+sounddevice
 requests
 python-dotenv
 pytz
@@ -7,3 +8,4 @@ beautifulsoup4
 pynput
 keyboard
 pyautogui
+psutil
