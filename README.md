@@ -15,7 +15,9 @@ I built **EchoMind** as a lightweight, modular AI voice assistant that lives in 
 - 🎙️ **Voice I/O** — I integrated speech-to-text and text-to-speech so the assistant can hear me and talk back.
 - 🧩 **Modular Handlers** — I organized the codebase into small, focused handler modules inside `handlers/` (time, date, weather, files, music, system controls, app management, and more).
 - 🌐 **AI Intelligence** — When no local handler matches, my assistant forwards the question to **Google Gemini** or **Groq** so it can answer virtually anything.
+- 🏏 **Live Cricket Scores** — I can ask for real-time cricket scores and match status using the cricketdata API.
 - 📝 **Smart Document Writing** — I can ask it to open Notepad or Word and write stories, poems, or even real song lyrics in any language, including Bengali and Hindi.
+- 🔔 **Voice Reminders** — I can set, list, and cancel reminders by voice (e.g., *"remind me at 9:45 PM"*).
 - 🔋 **Background Monitoring** — Battery level and USB device detection threads run silently in the background and alert me when something changes.
 - ⌨️ **Global Hotkeys** — I set up F1 for the Emoji Picker and F5 for quick unmute.
 - 🗣️ **Always Listening** — After every action, my assistant proactively says *"I am listening to you..."* so I never have to wonder if it's still active.
@@ -44,6 +46,7 @@ I use a `.env` file to manage all my API keys and settings. Here are the importa
 | `GEMINI_API_STREAM` | Set to `true` for streaming responses. |
 | `GROQ_API_KEY` | Backup AI provider (auto-fallback). |
 | `OPENWEATHER_API_KEY` | For real-time weather lookups. |
+| `CRICKETDATA_API_KEY` | For real-time cricket scores. |
 
 Example `.env` entry:
 
@@ -99,6 +102,7 @@ EchoMind/
 │   ├── web_handler.py       # Web search & browsing
 │   ├── weather_handler.py   # Weather lookups
 │   ├── tab_navigation_handler.py # Browser tab control
+│   ├── reminder_handler.py  # Voice-activated reminders
 │   └── ...more handlers
 ├── utils/
 │   ├── voice_io.py          # 🎙️ Speech recognition & TTS
