@@ -69,18 +69,6 @@ To enable this, just set `OPENWEATHER_API_KEY` in your `.env`. Temperatures are 
 
 ---
 
-## ▶️ Running EchoMind
-
-Start my assistant from the project root:
-
-```bash
-python main.py
-```
-
-It will greet you, then listen in a continuous loop. Speak naturally — it handles the rest. For a full list of what you can say, check out my **[INSTRUCTIONS.md](./INSTRUCTIONS.md)** 📖.
-
----
-
 ## 🏗️ Project Structure
 
 Here's a quick overview of how I organized everything:
