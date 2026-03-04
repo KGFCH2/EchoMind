@@ -144,25 +144,23 @@ I designed EchoMind with a modular, **handler-based architecture**. This means e
 
 ### 📂 1. Project Root Directories
 
-* **`clients/`**: Contains the AI service wrappers that connect EchoMind to external LLMs (Large Language Models).
-* **`config/`**: Stores global configuration settings, environment variables, and platform-specific mappings.
-* **`handlers/`**: The "Muscle" of the project. Contains over 25 individual modules that perform specific actions on your system.
-* **`utils/`**: The "Senses" and "Nerves." Contains helper scripts for voice input/output, logging, and data formatting.
-* **`logs/`**: Automatically generated folder that stores your interaction history in `.jsonl` format for later review.
-* **`models/`**: (Optional/Hidden) Stores offline machine learning models (like Vosk) for offline speech recognition.
+* **`clients/`**: AI service wrappers for Gemini and Groq.
+* **`config/`**: Global settings and platform mappings.
+* **`handlers/`**: Core action modules (Muscle).
+* **`utils/`**: Helper scripts for voice, logging, and data (Senses).
+* **`logs/`**: Interaction history.
+* **`models/`**: Offline speech models (e.g., Vosk).
 
 ---
 
 ### 📄 2. Root Files (The Core)
 
-* **`main.py`**: The brain of the assistant. It initializes all components, starts background threads, and contains the main loop that routes your voice to the correct handler. 🎛️
-* **`.env`**: (Hidden) Stores your secret API keys (Gemini, Groq, Weather, Cricket). This file is ignored by Git for security. 🔑
-* **`.env.example`**: A template file showing you what keys you need to add to your own `.env` file. 📑
-* **`.gitignore`**: Tells Git which files to ignore (like `.env`, `__pycache__`, and `models/`) to keep the repository clean. 🚫
-* **`.free_apis.md`**: (Hidden) A curated list of free APIs I discovered that can be used to add more live data to EchoMind. 🌐
-* **`requirements.txt`**: Lists all Python libraries needed to run the project (e.g., `speechrecognition`, `pyautogui`, `sounddevice`). 📦
-* **`README.md`**: The main landing page of the project with a high-level overview. 📖
-* **`INSTRUCTIONS.md`**: This file! A comprehensive guide for users and developers. 📖
+* **`main.py`**: The main entry point and terminal loop. 🎛️
+* **`.env`**: (Hidden) Stores your secret API keys. 🔑
+* **`.gitignore`**: Ignores sensitive files and large folders like `node_modules` and `models`. 🚫
+* **`requirements.txt`**: Lists Python dependencies (added `fastapi`, `uvicorn`, `socketio`). 📦
+* **`README.md`**: High-level project overview and setup guide. 📖
+* **`INSTRUCTIONS.md`**: This exhaustive developer and user guide. 📖
 * **`FUTURE_FEATURES.md`**: A roadmap of what I plan to build next for EchoMind. 🚀
 * **`LICENSE`**: The legal license (MIT) governing how this code can be used. ⚖️
 
