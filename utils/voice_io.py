@@ -3,6 +3,7 @@ import subprocess
 import speech_recognition as sr
 from config.settings import OS
 import sounddevice as sd
+import typing
 
 class SoundDeviceMicrophone(sr.AudioSource):
     """Custom microphone wrapper to substitute PyAudio with sounddevice."""
@@ -16,8 +17,8 @@ class SoundDeviceMicrophone(sr.AudioSource):
         else:
             self.SAMPLE_RATE = sample_rate
         self.CHUNK = chunk_size
-        self.audio = None
-        self.stream = None
+        self.audio: typing.Any = None
+        self.stream: typing.Any = None
 
     def __enter__(self):
         assert self.stream is None, "This audio source is already inside a context manager"
@@ -52,6 +53,7 @@ def speak(text):
     # Strip Markdown formatting (asterisks, bold markers) before speaking
     clean_text = text.replace("**", "").replace("*", "").replace("__", "").replace("_", "")
     print(f"Speaking: {clean_text}")
+    
     try:
         if OS == "windows":
             subprocess.run(["powershell", "-c", f'(New-Object -ComObject SAPI.SpVoice).Speak("{clean_text}")'], capture_output=True)
@@ -81,7 +83,7 @@ def speak_stream(chunks, min_buffer: int = 200, pause_on_punctuation: bool = Fal
 
     This ensures clean single output without duplication.
     """
-    buf = []
+    buf: "list[str]" = []
 
     for c in chunks:
         if not c:
